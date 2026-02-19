@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Icon } from '@iconify/react';
-import { connections, maya, vibeColors } from '@/data/mockData';
+import { connections, maya, vibeColors, mockPartyMatch, mockActiveParty, questUnlocks, bulletinPosts } from '@/data/mockData';
 import FindPartyModal from '@/components/social/FindPartyModal';
 import ConnectionCard from '@/components/social/ConnectionCard';
 import ProfilePanel from '@/components/social/ProfilePanel';
 import MessagesTab from '@/components/social/MessagesTab';
 import type { Connection } from '@/types/social';
+
 
 type Tab = 'party' | 'connections' | 'messages';
 
@@ -83,46 +84,117 @@ const SocialPage = () => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.2 }}
-              className="absolute inset-0 flex flex-col items-center justify-center p-6 gap-6"
+              className="absolute inset-0 overflow-y-auto"
             >
-              {/* Illustration ring */}
-              <div className="relative w-40 h-40 flex items-center justify-center">
-                <div className="absolute inset-0 rounded-full border-2 border-primary/20 animate-ping" style={{ animationDuration: '3s' }} />
-                <div className="absolute inset-4 rounded-full border-2 border-primary/30" />
-                <div className="w-20 h-20 rounded-full bg-primary/10 border-2 border-primary flex items-center justify-center">
-                  <Icon icon="solar:users-group-rounded-bold" className="text-primary" width={36} />
-                </div>
-              </div>
-
-              <div className="text-center">
-                <h2 className="text-xl font-bold mb-2">Ready to Party Up?</h2>
-                <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
-                  We'll match you with 2–3 compatible peers based on your vibe, quests, and goals.
-                </p>
-              </div>
-
-              {partyFormed ? (
-                <div className="w-full max-w-xs">
-                  <div className="flex items-center gap-2 bg-accent/10 border border-accent/30 text-accent rounded-xl px-4 py-3 mb-3">
-                    <Icon icon="solar:check-circle-bold" width={18} />
-                    <span className="text-sm font-semibold">Party formed! Check Messages.</span>
+              <div className="flex flex-col items-center p-6 gap-6">
+                {/* Illustration ring */}
+                <div className="relative w-40 h-40 flex items-center justify-center shrink-0">
+                  <div className="absolute inset-0 rounded-full border-2 border-primary/20 animate-ping" style={{ animationDuration: '3s' }} />
+                  <div className="absolute inset-4 rounded-full border-2 border-primary/30" />
+                  <div className="w-20 h-20 rounded-full bg-primary/10 border-2 border-primary flex items-center justify-center">
+                    <Icon icon="solar:users-group-rounded-bold" className="text-primary" width={36} />
                   </div>
-                  <button
-                    onClick={() => { setPartyFormed(false); setOpenPartyChat(false); }}
-                    className="w-full py-3 rounded-full border border-border text-sm font-semibold text-muted-foreground active:scale-95 transition-transform"
-                  >
-                    Disband Party
-                  </button>
                 </div>
-              ) : (
-                <button
-                  onClick={() => setPartyModalOpen(true)}
-                  className="w-full max-w-xs py-4 bg-primary text-primary-foreground rounded-full font-bold text-base flex items-center justify-center gap-2 active:scale-95 transition-transform shadow-lg"
-                >
-                  <Icon icon="solar:magic-stick-3-bold" width={20} />
-                  Find Party
-                </button>
-              )}
+
+                <div className="text-center">
+                  <h2 className="text-xl font-bold mb-2">Ready to Party Up?</h2>
+                  <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
+                    We'll match you with 2–3 compatible peers based on your vibe, quests, and goals.
+                  </p>
+                </div>
+
+                {partyFormed ? (
+                  <div className="w-full max-w-xs flex flex-col gap-3">
+                    <div className="flex items-center gap-2 bg-accent/10 border border-accent/30 text-accent rounded-xl px-4 py-3">
+                      <Icon icon="solar:check-circle-bold" width={18} />
+                      <span className="text-sm font-semibold">Party formed! Check Messages.</span>
+                    </div>
+                    <button
+                      onClick={() => { setPartyFormed(false); setOpenPartyChat(false); }}
+                      className="w-full py-3 rounded-full border border-border text-sm font-semibold text-muted-foreground active:scale-95 transition-transform"
+                    >
+                      Disband Party
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setPartyModalOpen(true)}
+                    className="w-full max-w-xs py-4 bg-primary text-primary-foreground rounded-full font-bold text-base flex items-center justify-center gap-2 active:scale-95 transition-transform shadow-lg"
+                  >
+                    <Icon icon="solar:magic-stick-3-bold" width={20} />
+                    Find Party
+                  </button>
+                )}
+
+                {/* ── Active Party Panel ── */}
+                {partyFormed && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                    className="w-full max-w-xs flex flex-col gap-3"
+                  >
+                    {/* Party header */}
+                    <div className="bg-card border border-border rounded-2xl p-4">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Icon icon="solar:fire-bold" className="text-primary" width={18} />
+                        <span className="font-bold text-sm">{mockActiveParty.name}</span>
+                        <span className="ml-auto flex items-center gap-1.5 bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                          <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+                          <span className="text-xs font-mono font-bold">Active</span>
+                        </span>
+                      </div>
+
+                      {/* Shared quests */}
+                      <div className="mb-3">
+                        <p className="text-xs text-muted-foreground font-mono uppercase tracking-wider mb-1.5">Shared Quests</p>
+                        <div className="flex flex-col gap-1">
+                          {mockActiveParty.sharedQuests.map((q) => (
+                            <div key={q} className="flex items-center gap-2 text-xs">
+                              <Icon icon="solar:sword-bold" className="text-primary shrink-0" width={12} />
+                              <span className="text-foreground/80">{q}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Completed simulations */}
+                      <div className="mb-3">
+                        <p className="text-xs text-muted-foreground font-mono uppercase tracking-wider mb-1.5">Completed Simulations</p>
+                        <div className="flex flex-col gap-1">
+                          {mockActiveParty.completedSimulations.map((s) => (
+                            <div key={s} className="flex items-center gap-2 text-xs">
+                              <Icon icon="solar:diploma-bold" className="text-accent shrink-0" width={12} />
+                              <span className="text-foreground/80">{s}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Next suggested quest */}
+                      <div className="bg-primary/8 border border-primary/20 rounded-xl px-3 py-2.5 flex items-center gap-2">
+                        <Icon icon="solar:map-arrow-right-bold" className="text-primary shrink-0" width={15} />
+                        <div>
+                          <p className="text-xs text-muted-foreground font-mono">Next Suggested Quest</p>
+                          <p className="text-xs font-semibold text-foreground">{mockActiveParty.nextSuggestedQuest}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Party members row */}
+                    <div className="flex items-center gap-2">
+                      {mockPartyMatch.members.map((m) => (
+                        <div key={m.id} className="flex items-center gap-1.5 bg-card border border-border rounded-full px-2.5 py-1.5">
+                          <div className="w-5 h-5 rounded-full overflow-hidden border shrink-0" style={{ borderColor: vibeColors[m.vibe] }}>
+                            <img src={m.photo} alt={m.name} className="w-full h-full object-cover" />
+                          </div>
+                          <span className="text-xs font-medium">{m.name.split(' ')[0]}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </div>
             </motion.div>
           )}
 
@@ -134,22 +206,92 @@ const SocialPage = () => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.2 }}
-              className="absolute inset-0 overflow-y-auto p-4 space-y-2"
+              className="absolute inset-0 overflow-y-auto"
             >
-              <p className="text-xs text-muted-foreground font-mono px-1 mb-3">
-                {connections.length} people you've connected with
-              </p>
-              {connections.map((c) => (
-                <ConnectionCard
-                  key={c.id}
-                  connection={c}
-                  onClick={() => setSelectedConnection(c)}
-                />
-              ))}
+              <div className="p-4 space-y-4">
+                {/* Connection list */}
+                <div className="space-y-2">
+                  <p className="text-xs text-muted-foreground font-mono px-1">
+                    {connections.length} people you've connected with
+                  </p>
+                  {connections.map((c) => (
+                    <ConnectionCard
+                      key={c.id}
+                      connection={c}
+                      onClick={() => setSelectedConnection(c)}
+                    />
+                  ))}
+                </div>
+
+                {/* ── Quest Unlocks ── */}
+                <div>
+                  <div className="flex items-center gap-2 px-1 mb-3">
+                    <Icon icon="solar:lock-keyhole-minimalistic-bold" className="text-primary" width={16} />
+                    <h3 className="font-bold text-sm">Quest Unlocks</h3>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    {questUnlocks.map((q) => (
+                      <div
+                        key={q.id}
+                        className={`flex items-center gap-3 rounded-xl px-4 py-3 border ${
+                          q.locked
+                            ? 'bg-muted/40 border-border/50'
+                            : 'bg-card border-border'
+                        }`}
+                      >
+                        <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${
+                          q.locked ? 'bg-muted' : 'bg-primary/10'
+                        }`}>
+                          <Icon
+                            icon={q.locked ? 'solar:lock-keyhole-bold' : 'solar:sword-bold'}
+                            className={q.locked ? 'text-muted-foreground' : 'text-primary'}
+                            width={16}
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className={`text-sm font-semibold truncate ${q.locked ? 'text-muted-foreground' : 'text-foreground'}`}>
+                            {q.title}
+                          </p>
+                          {q.locked && q.unlockCondition && (
+                            <p className="text-xs text-muted-foreground mt-0.5">{q.unlockCondition}</p>
+                          )}
+                          {!q.locked && (
+                            <p className="text-xs text-primary font-mono mt-0.5">Unlocked</p>
+                          )}
+                        </div>
+                        {q.locked && (
+                          <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full font-mono shrink-0">🔒 Locked</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* ── Community Insights ── */}
+                <div>
+                  <div className="flex items-center gap-2 px-1 mb-3">
+                    <Icon icon="solar:users-group-rounded-bold" className="text-primary" width={16} />
+                    <h3 className="font-bold text-sm">Community Insights</h3>
+                  </div>
+                  <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4" style={{ scrollbarWidth: 'none' }}>
+                    {bulletinPosts.map((post) => (
+                      <div
+                        key={post.id}
+                        className="flex-shrink-0 w-52 bg-card border border-border rounded-xl p-3.5 flex flex-col gap-2"
+                      >
+                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                          <Icon icon={post.icon} className="text-primary" width={15} />
+                        </div>
+                        <p className="text-xs leading-relaxed text-foreground">{post.text}</p>
+                        <p className="text-xs text-muted-foreground font-mono mt-auto">{post.time}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </motion.div>
           )}
 
-          {/* ─── Messages ─── */}
           {tab === 'messages' && (
             <motion.div
               key="messages"

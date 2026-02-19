@@ -1,4 +1,4 @@
-import type { Player, Connection, Conversation, PartyMatch } from '@/types/social';
+import type { Player, Connection, Conversation, PartyMatch, QuestUnlock, BulletinPost, ActiveParty } from '@/types/social';
 
 export const vibeColors: Record<string, string> = {
   creator: 'hsl(11 100% 64%)',
@@ -35,6 +35,8 @@ export const connections: Connection[] = [
     sharedQuests: 4,
     isMentor: true,
     lastSeen: '2h ago',
+    metThrough: 'ConEd Grid Challenge',
+    metThroughType: 'quest',
   },
   {
     id: 'sam',
@@ -45,6 +47,8 @@ export const connections: Connection[] = [
     sharedQuests: 2,
     isMentor: false,
     lastSeen: '5h ago',
+    metThrough: 'Sustainability Simulation',
+    metThroughType: 'simulation',
   },
   {
     id: 'jordan',
@@ -55,6 +59,8 @@ export const connections: Connection[] = [
     sharedQuests: 7,
     isMentor: true,
     lastSeen: 'Yesterday',
+    metThrough: 'MakerLab Sprint',
+    metThroughType: 'quest',
   },
   {
     id: 'priya',
@@ -65,6 +71,8 @@ export const connections: Connection[] = [
     sharedQuests: 1,
     isMentor: false,
     lastSeen: '3d ago',
+    metThrough: 'Sustainability Simulation',
+    metThroughType: 'simulation',
   },
   {
     id: 'felix',
@@ -75,6 +83,8 @@ export const connections: Connection[] = [
     sharedQuests: 3,
     isMentor: false,
     lastSeen: '1d ago',
+    metThrough: 'ConEd Grid Challenge',
+    metThroughType: 'quest',
   },
 ];
 
@@ -86,6 +96,28 @@ export const mockPartyMatch: PartyMatch = {
   rationale:
     "Alex brings Fixer precision, Sam bridges groups as Connector, and Jordan's Competitor drive keeps the team pushing further. A well-balanced trio for your next quest.",
 };
+
+export const mockActiveParty: ActiveParty = {
+  name: 'ConEd Quest Squad',
+  sharedQuests: ['ConEd Grid Challenge', 'North District Mapping'],
+  completedSimulations: ['Sustainability Simulation', 'Urban Planning Sim'],
+  nextSuggestedQuest: 'MakerLab Internship Sprint',
+};
+
+export const questUnlocks: QuestUnlock[] = [
+  { id: 'qu1', title: 'ConEd Grid Challenge', locked: false },
+  { id: 'qu2', title: 'North District Mapping', locked: false },
+  { id: 'qu3', title: 'Advanced Energy Audit', locked: true, unlockCondition: 'Complete Sustainability Simulation to Unlock' },
+  { id: 'qu4', title: 'MakerLab Internship Sprint', locked: true, unlockCondition: 'Complete MakerLab Sprint Quest to Unlock' },
+];
+
+export const bulletinPosts: BulletinPost[] = [
+  { id: 'bp1', text: 'Aisha shared resources for ConEd', time: '10m ago', icon: 'solar:document-bold' },
+  { id: 'bp2', text: '3 students discussed MakerLab Internship', time: '1h ago', icon: 'solar:chat-round-bold' },
+  { id: 'bp3', text: 'Jordan posted a tip for the Grid Challenge', time: '2h ago', icon: 'solar:lightbulb-bold' },
+  { id: 'bp4', text: 'New Sustainability Simulation guide dropped', time: '3h ago', icon: 'solar:star-bold' },
+];
+
 
 export const conversations: Conversation[] = [
   {

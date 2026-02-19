@@ -31,7 +31,7 @@ const ConnectionCard = ({ connection, onClick }: Props) => {
             </span>
           )}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 mb-1">
           <span
             className="text-xs font-mono font-bold"
             style={{ color: vibeColors[connection.vibe] }}
@@ -40,6 +40,20 @@ const ConnectionCard = ({ connection, onClick }: Props) => {
           </span>
           <span className="text-xs text-muted-foreground font-mono">LVL {connection.level}</span>
         </div>
+        {connection.metThrough && (
+          <div className="flex items-center gap-1">
+            <Icon
+              icon={connection.metThroughType === 'simulation' ? 'solar:diploma-bold' : 'solar:sword-bold'}
+              className="text-muted-foreground shrink-0"
+              width={11}
+            />
+            <span className="text-xs text-muted-foreground truncate">
+              {connection.metThroughType === 'simulation' ? 'Completed' : 'Met through'}
+              {' '}
+              <span className="text-foreground/70">{connection.metThrough}</span>
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Shared quests + chevron */}
@@ -57,3 +71,4 @@ const ConnectionCard = ({ connection, onClick }: Props) => {
 };
 
 export default ConnectionCard;
+

@@ -21,6 +21,29 @@ export interface Connection {
   sharedQuests: number;
   isMentor: boolean;
   lastSeen: string;
+  metThrough?: string;       // quest or simulation name
+  metThroughType?: 'quest' | 'simulation';
+}
+
+export interface QuestUnlock {
+  id: string;
+  title: string;
+  locked: boolean;
+  unlockCondition?: string;
+}
+
+export interface BulletinPost {
+  id: string;
+  text: string;
+  time: string;
+  icon: string;
+}
+
+export interface ActiveParty {
+  name: string;
+  sharedQuests: string[];
+  completedSimulations: string[];
+  nextSuggestedQuest: string;
 }
 
 export interface Message {
