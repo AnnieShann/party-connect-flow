@@ -1,4 +1,18 @@
 export type Vibe = 'creator' | 'fixer' | 'connector' | 'competitor';
+export type DiscoverRole = 'Peer' | 'Mentor' | 'Career Coach';
+export type DiscoverFilter = 'all' | 'peers' | 'mentors' | 'nearby';
+
+export interface DiscoverPerson {
+  id: string;
+  name: string;
+  photo: string;
+  vibe: Vibe;
+  role: DiscoverRole;
+  level: number;
+  sharedTrait: string;       // e.g. "Also completed Sustainability Simulation"
+  distance: string;          // e.g. "1.2 miles away"
+  connected: boolean;
+}
 
 export interface Player {
   id: string;
