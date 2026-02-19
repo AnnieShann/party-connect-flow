@@ -1,35 +1,90 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Icon } from '@iconify/react';
-import { conversations, maya, vibeColors } from '@/data/mockData';
-import type { Conversation } from '@/types/social';
+import { vibeColors } from '@/data/mockData';
+import type { Connection, Conversation } from '@/types/social';
 
 interface Props {
-  highlightPartyChat?: boolean;
+  connections: Connection[];
+  partyFormed: boolean;
+  partyMembers: Connection[];
   partyFormationMessage?: string | null;
 }
 
-const MessagesTab = ({ highlightPartyChat, partyFormationMessage }: Props) => {
-  const [active, setActive] = useState<Conversation | null>(
-    highlightPartyChat ? conversations[0] : null
-  );
+/** Build a DM conversation stub from a Connection */
+const dmFromConnection = (c: Connection): Conversation => ({
+  id: `dm-${c.id}`,
+  type: 'dm',
+  name: c.name,
+  photo: c.photo,
+  lastMessage: 'Say hi! 👋',
+  lastTime: c.lastSeen,
+  unread: 0,
+  messages: [
+    {
+      id: `dm-${c.id}-welcome`,
+      senderId: 'system',
+      text: `You connected with ${c.name.split(' ')[0]}. Start a conversation!`,
+      timestamp: c.lastSeen,
+    },
+  ],
+});
+
+const MessagesTab = ({ connections, partyFormed, partyMembers, partyFormationMessage }: Props) => {
+  const [active, setActive] = useState<Conversation | null>(null);
   const [draft, setDraft] = useState('');
 
-  // If a party was just formed, inject a system message into the party chat
-  const activeMessages = active
-    ? active.type === 'party' && partyFormationMessage
-      ? [
-          { id: 'sys-party', senderId: 'system', text: partyFormationMessage, timestamp: 'Now' },
-          ...active.messages,
-        ]
-      : active.messages
-    : [];
+  /** Derive conversation list from shared connections state */
+  const conversations = useMemo<Conversation[]>(() => {
+    const list: Conversation[] = [];
+
+    // Party chat — only when a party is active
+    if (partyFormed && partyMembers.length > 0) {
+      const partyNames = partyMembers.map((m) => m.name.split(' ')[0]).join(', ');
+      list.push({
+        id: 'conv-party',
+        type: 'party',
+        name: 'Party Chat 🔥',
+        participants: partyMembers.map((m) => m.id),
+        lastMessage: partyFormationMessage ?? `Party with ${partyNames}`,
+        lastTime: 'Now',
+        unread: 0,
+        messages: partyFormationMessage
+          ? [{ id: 'sys-party', senderId: 'system', text: partyFormationMessage, timestamp: 'Now' }]
+          : [],
+      });
+    }
+
+    // One DM thread per connection
+    connections.forEach((c) => {
+      list.push(dmFromConnection(c));
+    });
+
+    return list;
+  }, [connections, partyFormed, partyMembers, partyFormationMessage]);
+
+  // Sync active conversation when conversations list updates (e.g. new connection added)
+  const activeConv = active
+    ? conversations.find((c) => c.id === active.id) ?? active
+    : null;
+
+  const activeMessages = activeConv?.messages ?? [];
+
+  if (conversations.length === 0) {
+    return (
+      <div className="flex flex-col items-center gap-3 py-20 text-center px-6">
+        <Icon icon="solar:chat-round-bold" className="text-muted-foreground" width={40} />
+        <p className="text-sm text-muted-foreground">No messages yet.</p>
+        <p className="text-xs text-muted-foreground">Connect with people in Discover to start chatting.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="relative flex-1 overflow-hidden flex flex-col">
       {/* Conversation list */}
       <AnimatePresence initial={false}>
-        {!active && (
+        {!activeConv && (
           <motion.div
             key="list"
             initial={{ x: '-100%', opacity: 0 }}
@@ -58,11 +113,7 @@ const MessagesTab = ({ highlightPartyChat, partyFormationMessage }: Props) => {
                     <span className="font-semibold text-sm">{conv.name}</span>
                     <span className="text-xs text-muted-foreground shrink-0">{conv.lastTime}</span>
                   </div>
-                  <p className="text-xs text-muted-foreground truncate">
-                    {conv.type === 'party' && partyFormationMessage
-                      ? partyFormationMessage
-                      : conv.lastMessage}
-                  </p>
+                  <p className="text-xs text-muted-foreground truncate">{conv.lastMessage}</p>
                 </div>
                 {conv.unread > 0 && (
                   <span className="shrink-0 w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center">
@@ -77,7 +128,7 @@ const MessagesTab = ({ highlightPartyChat, partyFormationMessage }: Props) => {
 
       {/* DM / Chat detail view */}
       <AnimatePresence initial={false}>
-        {active && (
+        {activeConv && (
           <motion.div
             key="detail"
             initial={{ x: '100%', opacity: 0 }}
@@ -91,16 +142,16 @@ const MessagesTab = ({ highlightPartyChat, partyFormationMessage }: Props) => {
               <button onClick={() => setActive(null)} className="active:scale-90 transition-transform">
                 <Icon icon="solar:alt-arrow-left-bold" className="text-foreground" width={22} />
               </button>
-              {active.type === 'party' ? (
+              {activeConv.type === 'party' ? (
                 <div className="w-9 h-9 rounded-full bg-primary/20 border-2 border-primary flex items-center justify-center">
                   <Icon icon="solar:users-group-rounded-bold" className="text-primary" width={18} />
                 </div>
               ) : (
                 <div className="w-9 h-9 rounded-full overflow-hidden border-2 border-border">
-                  <img src={active.photo} alt={active.name} className="w-full h-full object-cover" />
+                  <img src={activeConv.photo} alt={activeConv.name} className="w-full h-full object-cover" />
                 </div>
               )}
-              <span className="font-bold text-sm flex-1">{active.name}</span>
+              <span className="font-bold text-sm flex-1">{activeConv.name}</span>
             </div>
 
             {/* Messages */}
@@ -128,7 +179,7 @@ const MessagesTab = ({ highlightPartyChat, partyFormationMessage }: Props) => {
                           : 'bg-muted text-foreground rounded-bl-sm'
                       }`}
                     >
-                      {!isMe && active.type === 'party' && (
+                      {!isMe && activeConv.type === 'party' && (
                         <div
                           className="text-xs font-bold mb-1"
                           style={{ color: vibeColors['connector'] }}
@@ -144,6 +195,13 @@ const MessagesTab = ({ highlightPartyChat, partyFormationMessage }: Props) => {
                   </div>
                 );
               })}
+
+              {activeMessages.length === 0 && (
+                <div className="flex flex-col items-center gap-2 py-8 text-center">
+                  <Icon icon="solar:chat-round-linear" className="text-muted-foreground" width={32} />
+                  <p className="text-xs text-muted-foreground">No messages yet. Say hello!</p>
+                </div>
+              )}
             </div>
 
             {/* Input */}

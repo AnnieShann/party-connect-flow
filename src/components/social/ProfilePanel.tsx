@@ -5,10 +5,16 @@ import type { Connection } from '@/types/social';
 
 interface Props {
   connection: Connection | null;
+  partyFormed: boolean;
+  partyMemberCount: number;
   onClose: () => void;
+  onInviteToParty: (connection: Connection) => void;
 }
 
-const ProfilePanel = ({ connection, onClose }: Props) => {
+const ProfilePanel = ({ connection, partyFormed, partyMemberCount, onClose, onInviteToParty }: Props) => {
+  const canInvite = !partyFormed || partyMemberCount < 3;
+  const inviteLabel = partyFormed ? 'Add to Party' : 'Invite to Party';
+
   return (
     <AnimatePresence>
       {connection && (
@@ -56,7 +62,7 @@ const ProfilePanel = ({ connection, onClose }: Props) => {
               </div>
             </div>
 
-          {/* Stats row */}
+            {/* Stats row */}
             <div className="grid grid-cols-3 gap-2">
               <div className="bg-card rounded-xl p-3 border border-border text-center">
                 <div className="text-xl font-bold font-mono text-primary">{connection.level}</div>
@@ -105,22 +111,24 @@ const ProfilePanel = ({ connection, onClose }: Props) => {
             </div>
 
             {/* Shared progression */}
-            <div className="bg-card rounded-xl p-4 border border-border">
-              <div className="text-xs text-muted-foreground mb-3 font-mono uppercase tracking-wider">Shared Progression</div>
-              <div className="flex flex-col gap-2">
-                {Array.from({ length: connection.sharedQuests }).slice(0, 3).map((_, i) => (
-                  <div key={i} className="flex items-center gap-2 text-xs">
-                    <Icon icon="solar:sword-bold" className="text-primary shrink-0" width={12} />
-                    <span className="text-foreground/70">
-                      {['ConEd Grid Challenge', 'North District Mapping', 'MakerLab Sprint', 'Sustainability Sim'][i % 4]}
-                    </span>
-                  </div>
-                ))}
-                {connection.sharedQuests > 3 && (
-                  <p className="text-xs text-muted-foreground font-mono">+{connection.sharedQuests - 3} more</p>
-                )}
+            {connection.sharedQuests > 0 && (
+              <div className="bg-card rounded-xl p-4 border border-border">
+                <div className="text-xs text-muted-foreground mb-3 font-mono uppercase tracking-wider">Shared Progression</div>
+                <div className="flex flex-col gap-2">
+                  {Array.from({ length: connection.sharedQuests }).slice(0, 3).map((_, i) => (
+                    <div key={i} className="flex items-center gap-2 text-xs">
+                      <Icon icon="solar:sword-bold" className="text-primary shrink-0" width={12} />
+                      <span className="text-foreground/70">
+                        {['ConEd Grid Challenge', 'North District Mapping', 'MakerLab Sprint', 'Sustainability Sim'][i % 4]}
+                      </span>
+                    </div>
+                  ))}
+                  {connection.sharedQuests > 3 && (
+                    <p className="text-xs text-muted-foreground font-mono">+{connection.sharedQuests - 3} more</p>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* CTAs */}
             <div className="flex flex-col gap-2">
@@ -128,10 +136,29 @@ const ProfilePanel = ({ connection, onClose }: Props) => {
                 <Icon icon="solar:chat-round-bold" width={18} />
                 Send Message
               </button>
-              <button className="w-full py-3 rounded-full border border-border text-sm font-semibold text-foreground flex items-center justify-center gap-2 active:scale-95 transition-transform">
-                <Icon icon="solar:users-group-rounded-bold" width={16} />
-                Quest Together
-              </button>
+
+              {canInvite ? (
+                <button
+                  onClick={() => onInviteToParty(connection)}
+                  className="w-full py-3 rounded-full border border-border text-sm font-semibold text-foreground flex items-center justify-center gap-2 active:scale-95 transition-transform"
+                >
+                  <Icon icon="solar:users-group-rounded-bold" width={16} />
+                  {inviteLabel}
+                </button>
+              ) : (
+                <button
+                  disabled
+                  className="w-full py-3 rounded-full border border-border text-sm font-semibold text-muted-foreground flex items-center justify-center gap-2 opacity-50 cursor-not-allowed"
+                >
+                  <Icon icon="solar:users-group-rounded-bold" width={16} />
+                  Party Full (3/3)
+                </button>
+              )}
+
+              {/* Quest helper text */}
+              <p className="text-center text-xs text-muted-foreground pt-1">
+                Quests are completed through Parties.
+              </p>
             </div>
           </div>
         </motion.div>

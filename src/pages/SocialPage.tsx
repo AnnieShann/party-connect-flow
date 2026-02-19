@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Icon } from '@iconify/react';
-import { connections, maya, vibeColors, mockActiveParty, mockPartyMatch } from '@/data/mockData';
+import { maya, vibeColors, mockActiveParty, mockPartyMatch, connections as seedConnections } from '@/data/mockData';
 import ProfilePanel from '@/components/social/ProfilePanel';
 import MessagesTab from '@/components/social/MessagesTab';
 import DiscoverTab from '@/components/social/DiscoverTab';
 import NetworkTab from '@/components/social/NetworkTab';
-import type { Connection } from '@/types/social';
+import type { Connection, DiscoverPerson } from '@/types/social';
 
 type Tab = 'party' | 'connections' | 'messages' | 'discover';
 
@@ -17,13 +17,35 @@ const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: 'messages', label: 'Messages', icon: 'solar:chat-round-bold' },
 ];
 
+// Convert a DiscoverPerson to a Connection when they are connected with
+const personToConnection = (p: DiscoverPerson): Connection => ({
+  id: p.id,
+  name: p.name,
+  photo: p.photo,
+  vibe: p.vibe,
+  level: p.level,
+  sharedQuests: 0,
+  isMentor: p.role === 'Mentor' || p.role === 'Career Coach',
+  lastSeen: 'Just now',
+  metThrough: p.sharedTrait,
+  metThroughType: 'quest',
+});
+
 const SocialPage = () => {
   const [tab, setTab] = useState<Tab>('party');
   const [selectedConnection, setSelectedConnection] = useState<Connection | null>(null);
   const [partyFormed, setPartyFormed] = useState(false);
   const [partyMembers, setPartyMembers] = useState<Connection[]>([]);
-  const [extraConnections, setExtraConnections] = useState(0);
   const [partyFormationMessage, setPartyFormationMessage] = useState<string | null>(null);
+
+  // ── Single source of truth for all connections ──
+  const [sharedConnections, setSharedConnections] = useState<Connection[]>(seedConnections);
+
+  const handleConnect = (person: DiscoverPerson) => {
+    // Prevent duplicates
+    if (sharedConnections.some((c) => c.id === person.id)) return;
+    setSharedConnections((prev) => [personToConnection(person), ...prev]);
+  };
 
   const handlePartyFormed = (members: Connection[]) => {
     setPartyMembers(members);
@@ -33,6 +55,25 @@ const SocialPage = () => {
       `You formed a Party with ${names}. Ready to choose a quest? ⚔️`
     );
     setTab('messages');
+  };
+
+  const handleInviteToParty = (connection: Connection) => {
+    if (!partyFormed) {
+      // Create a new party with just this person
+      handlePartyFormed([connection]);
+    } else {
+      // Add to existing party (max 3 members)
+      if (partyMembers.length < 3 && !partyMembers.some((m) => m.id === connection.id)) {
+        const updated = [...partyMembers, connection];
+        setPartyMembers(updated);
+        const names = updated.map((m) => m.name.split(' ')[0]).join(', ');
+        setPartyFormationMessage(
+          `Party updated: ${names}. Ready to choose a quest? ⚔️`
+        );
+      }
+    }
+    setSelectedConnection(null);
+    setTab('party');
   };
 
   const handleDisband = () => {
@@ -54,7 +95,7 @@ const SocialPage = () => {
         <div className="flex-1">
           <h1 className="font-bold text-base">Social Hub</h1>
           <p className="text-xs text-muted-foreground font-mono">
-            LVL {maya.level} · {connections.length + extraConnections} connections
+            LVL {maya.level} · {sharedConnections.length} connections
           </p>
         </div>
         {partyFormed && (
@@ -253,7 +294,10 @@ const SocialPage = () => {
               transition={{ duration: 0.2 }}
               className="absolute inset-0"
             >
-              <DiscoverTab onConnected={() => setExtraConnections((n) => n + 1)} />
+              <DiscoverTab
+                connectedIds={new Set(sharedConnections.map((c) => c.id))}
+                onConnected={handleConnect}
+              />
             </motion.div>
           )}
 
@@ -268,9 +312,9 @@ const SocialPage = () => {
               className="absolute inset-0"
             >
               <NetworkTab
+                connections={sharedConnections}
                 onProfileClick={setSelectedConnection}
                 onPartyFormed={handlePartyFormed}
-                extraConnections={extraConnections}
               />
             </motion.div>
           )}
@@ -286,7 +330,9 @@ const SocialPage = () => {
               className="absolute inset-0 flex flex-col"
             >
               <MessagesTab
-                highlightPartyChat={partyFormed}
+                connections={sharedConnections}
+                partyFormed={partyFormed}
+                partyMembers={partyMembers}
                 partyFormationMessage={partyFormationMessage}
               />
             </motion.div>
@@ -296,7 +342,10 @@ const SocialPage = () => {
         {/* Profile panel overlay */}
         <ProfilePanel
           connection={selectedConnection}
+          partyFormed={partyFormed}
+          partyMemberCount={partyMembers.length}
           onClose={() => setSelectedConnection(null)}
+          onInviteToParty={handleInviteToParty}
         />
       </div>
     </div>
