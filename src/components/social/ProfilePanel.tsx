@@ -56,37 +56,83 @@ const ProfilePanel = ({ connection, onClose }: Props) => {
               </div>
             </div>
 
-            {/* Stats */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="bg-card rounded-xl p-4 border border-border text-center">
-                <div className="text-2xl font-bold font-mono text-primary">{connection.level}</div>
-                <div className="text-xs text-muted-foreground mt-1">Level</div>
+          {/* Stats row */}
+            <div className="grid grid-cols-3 gap-2">
+              <div className="bg-card rounded-xl p-3 border border-border text-center">
+                <div className="text-xl font-bold font-mono text-primary">{connection.level}</div>
+                <div className="text-xs text-muted-foreground mt-0.5">Level</div>
               </div>
-              <div className="bg-card rounded-xl p-4 border border-border text-center">
-                <div className="text-2xl font-bold font-mono text-primary">{connection.sharedQuests}</div>
-                <div className="text-xs text-muted-foreground mt-1">Shared Quests</div>
+              <div className="bg-card rounded-xl p-3 border border-border text-center">
+                <div className="text-xl font-bold font-mono text-primary">{connection.sharedQuests}</div>
+                <div className="text-xs text-muted-foreground mt-0.5">Shared</div>
+              </div>
+              <div className="bg-card rounded-xl p-3 border border-border text-center">
+                <div className="text-xs font-bold font-mono text-foreground mt-1">{connection.lastSeen}</div>
+                <div className="text-xs text-muted-foreground mt-0.5">Last seen</div>
               </div>
             </div>
 
-            {/* Vibe badge */}
+            {/* Vibe + Met through */}
+            <div className="bg-card rounded-xl p-4 border border-border space-y-3">
+              <div>
+                <div className="text-xs text-muted-foreground mb-1.5 font-mono uppercase tracking-wider">Vibe</div>
+                <div className="flex items-center gap-2">
+                  <div
+                    className="w-2.5 h-2.5 rounded-full shrink-0"
+                    style={{ background: vibeColors[connection.vibe] }}
+                  />
+                  <span className="font-semibold text-sm" style={{ color: vibeColors[connection.vibe] }}>
+                    {vibeLabels[connection.vibe]}
+                  </span>
+                </div>
+              </div>
+
+              {connection.metThrough && (
+                <div>
+                  <div className="text-xs text-muted-foreground mb-1.5 font-mono uppercase tracking-wider">
+                    {connection.metThroughType === 'simulation' ? 'Completed Together' : 'Met Through'}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Icon
+                      icon={connection.metThroughType === 'simulation' ? 'solar:diploma-bold' : 'solar:sword-bold'}
+                      className="text-primary shrink-0"
+                      width={15}
+                    />
+                    <span className="text-sm font-semibold text-foreground">{connection.metThrough}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Shared progression */}
             <div className="bg-card rounded-xl p-4 border border-border">
-              <div className="text-xs text-muted-foreground mb-2 font-mono uppercase tracking-wider">Vibe</div>
-              <div className="flex items-center gap-2">
-                <div
-                  className="w-3 h-3 rounded-full"
-                  style={{ background: vibeColors[connection.vibe] }}
-                />
-                <span className="font-semibold" style={{ color: vibeColors[connection.vibe] }}>
-                  {vibeLabels[connection.vibe]}
-                </span>
+              <div className="text-xs text-muted-foreground mb-3 font-mono uppercase tracking-wider">Shared Progression</div>
+              <div className="flex flex-col gap-2">
+                {Array.from({ length: connection.sharedQuests }).slice(0, 3).map((_, i) => (
+                  <div key={i} className="flex items-center gap-2 text-xs">
+                    <Icon icon="solar:sword-bold" className="text-primary shrink-0" width={12} />
+                    <span className="text-foreground/70">
+                      {['ConEd Grid Challenge', 'North District Mapping', 'MakerLab Sprint', 'Sustainability Sim'][i % 4]}
+                    </span>
+                  </div>
+                ))}
+                {connection.sharedQuests > 3 && (
+                  <p className="text-xs text-muted-foreground font-mono">+{connection.sharedQuests - 3} more</p>
+                )}
               </div>
             </div>
 
-            {/* Send message CTA */}
-            <button className="w-full py-3.5 rounded-full bg-primary text-primary-foreground font-bold flex items-center justify-center gap-2 active:scale-95 transition-transform">
-              <Icon icon="solar:chat-round-bold" width={18} />
-              Send Message
-            </button>
+            {/* CTAs */}
+            <div className="flex flex-col gap-2">
+              <button className="w-full py-3.5 rounded-full bg-primary text-primary-foreground font-bold flex items-center justify-center gap-2 active:scale-95 transition-transform">
+                <Icon icon="solar:chat-round-bold" width={18} />
+                Send Message
+              </button>
+              <button className="w-full py-3 rounded-full border border-border text-sm font-semibold text-foreground flex items-center justify-center gap-2 active:scale-95 transition-transform">
+                <Icon icon="solar:users-group-rounded-bold" width={16} />
+                Quest Together
+              </button>
+            </div>
           </div>
         </motion.div>
       )}
