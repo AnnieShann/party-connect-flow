@@ -6,13 +6,24 @@ import type { Conversation } from '@/types/social';
 
 interface Props {
   highlightPartyChat?: boolean;
+  partyFormationMessage?: string | null;
 }
 
-const MessagesTab = ({ highlightPartyChat }: Props) => {
+const MessagesTab = ({ highlightPartyChat, partyFormationMessage }: Props) => {
   const [active, setActive] = useState<Conversation | null>(
     highlightPartyChat ? conversations[0] : null
   );
   const [draft, setDraft] = useState('');
+
+  // If a party was just formed, inject a system message into the party chat
+  const activeMessages = active
+    ? active.type === 'party' && partyFormationMessage
+      ? [
+          { id: 'sys-party', senderId: 'system', text: partyFormationMessage, timestamp: 'Now' },
+          ...active.messages,
+        ]
+      : active.messages
+    : [];
 
   return (
     <div className="relative flex-1 overflow-hidden flex flex-col">
@@ -47,7 +58,11 @@ const MessagesTab = ({ highlightPartyChat }: Props) => {
                     <span className="font-semibold text-sm">{conv.name}</span>
                     <span className="text-xs text-muted-foreground shrink-0">{conv.lastTime}</span>
                   </div>
-                  <p className="text-xs text-muted-foreground truncate">{conv.lastMessage}</p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {conv.type === 'party' && partyFormationMessage
+                      ? partyFormationMessage
+                      : conv.lastMessage}
+                  </p>
                 </div>
                 {conv.unread > 0 && (
                   <span className="shrink-0 w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center">
@@ -60,7 +75,7 @@ const MessagesTab = ({ highlightPartyChat }: Props) => {
         )}
       </AnimatePresence>
 
-      {/* DM detail view */}
+      {/* DM / Chat detail view */}
       <AnimatePresence initial={false}>
         {active && (
           <motion.div
@@ -90,8 +105,20 @@ const MessagesTab = ({ highlightPartyChat }: Props) => {
 
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
-              {active.messages.map((msg) => {
+              {activeMessages.map((msg) => {
+                const isSystem = msg.senderId === 'system';
                 const isMe = msg.senderId === 'maya';
+
+                if (isSystem) {
+                  return (
+                    <div key={msg.id} className="flex justify-center">
+                      <div className="max-w-[85%] bg-accent/10 border border-accent/30 text-accent rounded-2xl px-4 py-2.5 text-xs font-semibold text-center leading-snug">
+                        {msg.text}
+                      </div>
+                    </div>
+                  );
+                }
+
                 return (
                   <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
                     <div
