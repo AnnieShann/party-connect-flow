@@ -20,11 +20,10 @@ const roleIcon: Record<string, string> = {
 interface PersonCardProps {
   person: DiscoverPerson;
   onConnect: (id: string) => void;
-  onInvite: (id: string) => void;
   connected: boolean;
 }
 
-const PersonCard = ({ person, onConnect, onInvite, connected }: PersonCardProps) => (
+const PersonCard = ({ person, onConnect, connected }: PersonCardProps) => (
   <motion.div
     layout
     initial={{ opacity: 0, y: 10 }}
@@ -90,10 +89,10 @@ const PersonCard = ({ person, onConnect, onInvite, connected }: PersonCardProps)
       ) : (
         <>
           <button
-            onClick={() => onInvite(person.id)}
+            onClick={() => {}}
             className="text-xs font-semibold border border-border rounded-full px-3 py-1.5 text-foreground active:scale-95 transition-transform"
           >
-            Invite to Party
+            View Profile
           </button>
           <button
             onClick={() => onConnect(person.id)}
@@ -114,15 +113,10 @@ interface Props {
 const DiscoverTab = ({ onConnected }: Props) => {
   const [filter, setFilter] = useState<DiscoverFilter>('all');
   const [connectedIds, setConnectedIds] = useState<Set<string>>(new Set());
-  const [invitedIds, setInvitedIds] = useState<Set<string>>(new Set());
 
   const handleConnect = (id: string) => {
     setConnectedIds((prev) => new Set([...prev, id]));
     onConnected(id);
-  };
-
-  const handleInvite = (id: string) => {
-    setInvitedIds((prev) => new Set([...prev, id]));
   };
 
   const filtered = discoverPeople.filter((p) => {
@@ -138,6 +132,14 @@ const DiscoverTab = ({ onConnected }: Props) => {
   return (
     <div className="absolute inset-0 overflow-y-auto">
       <div className="p-4 space-y-5">
+
+        {/* Hint */}
+        <div className="flex items-center gap-2 bg-primary/8 border border-primary/20 rounded-xl px-3 py-2.5">
+          <Icon icon="solar:info-circle-bold" className="text-primary shrink-0" width={15} />
+          <p className="text-xs text-muted-foreground leading-snug">
+            Connect with people first — then invite them to a Party from your <span className="font-semibold text-foreground">Network</span>.
+          </p>
+        </div>
 
         {/* Filters */}
         <div className="flex gap-2">
@@ -169,7 +171,6 @@ const DiscoverTab = ({ onConnected }: Props) => {
                   person={p}
                   connected={connectedIds.has(p.id)}
                   onConnect={handleConnect}
-                  onInvite={handleInvite}
                 />
               ))}
             </AnimatePresence>
@@ -192,7 +193,6 @@ const DiscoverTab = ({ onConnected }: Props) => {
                   person={p}
                   connected={connectedIds.has(p.id)}
                   onConnect={handleConnect}
-                  onInvite={handleInvite}
                 />
               ))}
             </AnimatePresence>
@@ -205,21 +205,6 @@ const DiscoverTab = ({ onConnected }: Props) => {
             <p className="text-sm text-muted-foreground">No people found for this filter.</p>
           </div>
         )}
-
-        {/* Invited toast hint */}
-        <AnimatePresence>
-          {invitedIds.size > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              className="fixed bottom-24 left-1/2 -translate-x-1/2 bg-card border border-border shadow-lg rounded-full px-4 py-2 flex items-center gap-2 z-50"
-            >
-              <Icon icon="solar:users-group-rounded-bold" className="text-primary" width={15} />
-              <span className="text-xs font-semibold">Party invite sent!</span>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
     </div>
   );
