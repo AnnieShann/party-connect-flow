@@ -19,7 +19,7 @@ const roleIcon: Record<string, string> = {
 
 interface PersonCardProps {
   person: DiscoverPerson;
-  onConnect: (id: string) => void;
+  onConnect: (person: DiscoverPerson) => void;
   connected: boolean;
 }
 
@@ -95,7 +95,7 @@ const PersonCard = ({ person, onConnect, connected }: PersonCardProps) => (
             View Profile
           </button>
           <button
-            onClick={() => onConnect(person.id)}
+            onClick={() => onConnect(person)}
             className="text-xs font-bold bg-primary text-primary-foreground rounded-full px-3 py-1.5 active:scale-95 transition-transform"
           >
             Connect
@@ -107,17 +107,12 @@ const PersonCard = ({ person, onConnect, connected }: PersonCardProps) => (
 );
 
 interface Props {
-  onConnected: (id: string) => void;
+  connectedIds: Set<string>;
+  onConnected: (person: DiscoverPerson) => void;
 }
 
-const DiscoverTab = ({ onConnected }: Props) => {
+const DiscoverTab = ({ connectedIds, onConnected }: Props) => {
   const [filter, setFilter] = useState<DiscoverFilter>('all');
-  const [connectedIds, setConnectedIds] = useState<Set<string>>(new Set());
-
-  const handleConnect = (id: string) => {
-    setConnectedIds((prev) => new Set([...prev, id]));
-    onConnected(id);
-  };
 
   const filtered = discoverPeople.filter((p) => {
     if (filter === 'peers') return p.role === 'Peer';
@@ -170,7 +165,7 @@ const DiscoverTab = ({ onConnected }: Props) => {
                   key={p.id}
                   person={p}
                   connected={connectedIds.has(p.id)}
-                  onConnect={handleConnect}
+                  onConnect={onConnected}
                 />
               ))}
             </AnimatePresence>
@@ -192,7 +187,7 @@ const DiscoverTab = ({ onConnected }: Props) => {
                   key={p.id}
                   person={p}
                   connected={connectedIds.has(p.id)}
-                  onConnect={handleConnect}
+                  onConnect={onConnected}
                 />
               ))}
             </AnimatePresence>

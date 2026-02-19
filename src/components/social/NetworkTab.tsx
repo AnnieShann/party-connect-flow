@@ -1,17 +1,17 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Icon } from '@iconify/react';
-import { connections, questUnlocks, bulletinPosts, vibeColors } from '@/data/mockData';
+import { questUnlocks, bulletinPosts, vibeColors } from '@/data/mockData';
 import ConnectionCard from '@/components/social/ConnectionCard';
 import type { Connection } from '@/types/social';
 
 interface Props {
+  connections: Connection[];
   onProfileClick: (c: Connection) => void;
   onPartyFormed: (members: Connection[]) => void;
-  extraConnections: number;
 }
 
-const NetworkTab = ({ onProfileClick, onPartyFormed, extraConnections }: Props) => {
+const NetworkTab = ({ connections, onProfileClick, onPartyFormed }: Props) => {
   const [selecting, setSelecting] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
 
@@ -47,9 +47,9 @@ const NetworkTab = ({ onProfileClick, onPartyFormed, extraConnections }: Props) 
         <div className="space-y-2">
           <div className="flex items-center justify-between px-1">
             <p className="text-xs text-muted-foreground font-mono">
-              {connections.length + extraConnections} people you've connected with
+              {connections.length} {connections.length === 1 ? 'person' : 'people'} you've connected with
             </p>
-            {!selecting && (
+            {!selecting && connections.length > 0 && (
               <button
                 onClick={() => setSelecting(true)}
                 className="flex items-center gap-1.5 text-xs font-bold bg-primary text-primary-foreground px-3 py-1.5 rounded-full active:scale-95 transition-transform"
@@ -59,6 +59,15 @@ const NetworkTab = ({ onProfileClick, onPartyFormed, extraConnections }: Props) 
               </button>
             )}
           </div>
+
+          {/* Empty state */}
+          {connections.length === 0 && (
+            <div className="flex flex-col items-center gap-3 py-12 text-center">
+              <Icon icon="solar:users-group-rounded-bold" className="text-muted-foreground" width={40} />
+              <p className="text-sm text-muted-foreground">No connections yet.</p>
+              <p className="text-xs text-muted-foreground">Go to Discover to connect with peers and mentors.</p>
+            </div>
+          )}
 
           {/* Selection mode banner */}
           <AnimatePresence>
