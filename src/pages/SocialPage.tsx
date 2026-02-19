@@ -6,14 +6,16 @@ import FindPartyModal from '@/components/social/FindPartyModal';
 import ConnectionCard from '@/components/social/ConnectionCard';
 import ProfilePanel from '@/components/social/ProfilePanel';
 import MessagesTab from '@/components/social/MessagesTab';
+import DiscoverTab from '@/components/social/DiscoverTab';
 import type { Connection } from '@/types/social';
 
 
-type Tab = 'party' | 'connections' | 'messages';
+type Tab = 'party' | 'connections' | 'messages' | 'discover';
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
-  { id: 'party', label: 'Find Party', icon: 'solar:users-group-rounded-bold' },
-  { id: 'connections', label: 'Connections', icon: 'solar:link-bold' },
+  { id: 'party', label: 'Party', icon: 'solar:users-group-rounded-bold' },
+  { id: 'discover', label: 'Discover', icon: 'solar:compass-bold' },
+  { id: 'connections', label: 'Network', icon: 'solar:link-bold' },
   { id: 'messages', label: 'Messages', icon: 'solar:chat-round-bold' },
 ];
 
@@ -23,6 +25,7 @@ const SocialPage = () => {
   const [selectedConnection, setSelectedConnection] = useState<Connection | null>(null);
   const [partyFormed, setPartyFormed] = useState(false);
   const [openPartyChat, setOpenPartyChat] = useState(false);
+  const [extraConnections, setExtraConnections] = useState(0);
 
   const handleStartPartyChat = () => {
     setPartyFormed(true);
@@ -44,7 +47,7 @@ const SocialPage = () => {
         <div className="flex-1">
           <h1 className="font-bold text-base">Social Hub</h1>
           <p className="text-xs text-muted-foreground font-mono">
-            LVL {maya.level} · {connections.length} connections
+            LVL {maya.level} · {connections.length + extraConnections} connections
           </p>
         </div>
         {partyFormed && (
@@ -289,6 +292,19 @@ const SocialPage = () => {
                   </div>
                 </div>
               </div>
+            </motion.div>
+          )}
+
+          {tab === 'discover' && (
+            <motion.div
+              key="discover"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2 }}
+              className="absolute inset-0"
+            >
+              <DiscoverTab onConnected={() => setExtraConnections((n) => n + 1)} />
             </motion.div>
           )}
 

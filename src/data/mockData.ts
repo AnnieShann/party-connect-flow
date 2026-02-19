@@ -1,4 +1,4 @@
-import type { Player, Connection, Conversation, PartyMatch, QuestUnlock, BulletinPost, ActiveParty } from '@/types/social';
+import type { Player, Connection, Conversation, PartyMatch, QuestUnlock, BulletinPost, ActiveParty, DiscoverPerson } from '@/types/social';
 
 export const vibeColors: Record<string, string> = {
   creator: 'hsl(11 100% 64%)',
@@ -118,6 +118,75 @@ export const bulletinPosts: BulletinPost[] = [
   { id: 'bp4', text: 'New Sustainability Simulation guide dropped', time: '3h ago', icon: 'solar:star-bold' },
 ];
 
+
+export const discoverPeople: DiscoverPerson[] = [
+  {
+    id: 'dp1',
+    name: 'Aisha Mensah',
+    photo: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Aisha&backgroundColor=ffd5dc',
+    vibe: 'creator',
+    role: 'Peer',
+    level: 6,
+    sharedTrait: 'Also completed Sustainability Simulation',
+    distance: '0.8 miles away',
+    connected: false,
+  },
+  {
+    id: 'dp2',
+    name: 'Marcus Webb',
+    photo: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Marcus&backgroundColor=d1d4f9',
+    vibe: 'fixer',
+    role: 'Peer',
+    level: 8,
+    sharedTrait: 'Interested in ConEd Grid Challenge',
+    distance: '1.4 miles away',
+    connected: false,
+  },
+  {
+    id: 'dp3',
+    name: 'Zoe Park',
+    photo: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Zoe&backgroundColor=c0aede',
+    vibe: 'connector',
+    role: 'Peer',
+    level: 5,
+    sharedTrait: 'Also completed MakerLab Sprint',
+    distance: '3.1 miles away',
+    connected: false,
+  },
+  {
+    id: 'dp4',
+    name: 'Dr. Elena Vasquez',
+    photo: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Elena&backgroundColor=b6e3f4',
+    vibe: 'creator',
+    role: 'Mentor',
+    level: 18,
+    sharedTrait: 'Expertise in Sustainability & Energy',
+    distance: '1.1 miles away',
+    connected: false,
+  },
+  {
+    id: 'dp5',
+    name: 'Omar Hassan',
+    photo: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Omar&backgroundColor=ffd5dc',
+    vibe: 'competitor',
+    role: 'Peer',
+    level: 10,
+    sharedTrait: 'Shares Competitor vibe — loves leaderboards',
+    distance: '0.5 miles away',
+    connected: false,
+  },
+  {
+    id: 'dp6',
+    name: 'Rachel Kim',
+    photo: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Rachel&backgroundColor=d1d4f9',
+    vibe: 'fixer',
+    role: 'Career Coach',
+    level: 22,
+    sharedTrait: 'Specialises in tech & urban planning roles',
+    distance: '2.3 miles away',
+    connected: false,
+  },
+];
 
 export const conversations: Conversation[] = [
   {
